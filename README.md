@@ -32,8 +32,8 @@ Origo 是一台 3D 打印、全开源的人形机器人。整机 **21 个自由�
 
 ## 组件导览
 
-Origo 由若干独立仓库组成。本仓库 (`origo`) 是**聚合入口**——内容为文档、流水线和统一命令，
-实现代码位于各子仓库。
+Origo 由若干独立仓库组成。本仓库 (`origo`) 是**聚合入口**——内容为文档与仓库索引，
+实现代码位于各子仓库。**本仓库不提供统一命令入口**，各子仓库的命令在各自目录内执行。
 
 | 仓库 | 职责 | 依赖 |
 |---|---|---|
@@ -59,25 +59,45 @@ Origo 由若干独立仓库组成。本仓库 (`origo`) 是**聚合入口**—�
         │                   │                   │                  │
         └───────────────────┴───────────────────┴──────────────────┘
                             ▼
-                         origo  （本仓库：文档 / 流水线 / 统一命令）
+                         origo  （本仓库：文档 / 仓库索引）
 ```
 
-**关键设计**：四个消费方共享 `origo-description` 中的同一份关节顺序与执行器参数。
+**关键设计**：四个消费方以 `origo-description` 的关节顺序与执行器参数为准。
 
 ---
 
 ## 快速开始
 
-```bash
-git clone --recurse-submodules https://github.com/origo-robotics/origo.git
-cd origo
-make init    # 拉齐所有子仓库
-make sync    # 安装依赖
-make sim     # 起仿真
+各子仓库以**平级目录**协作（本阶段不使用 submodule）：
+
+```
+<工作区>/
+├── origo/                  ← 本仓库（文档 / 仓库索引）
+├── origo-description/
+├── origo-retarget/
+├── origo-rl-mjlab/
+├── origo-rl-isaaclab/
+├── origo-deploy/
+├── origo-hardware/
+├── origo-appearance/
+├── origo-navigation/
+└── origo-pipeline/
 ```
 
-> 本阶段子仓库以平级目录方式协作（见 [`docs/architecture.md`](docs/architecture.md)），
-> `--recurse-submodules` 与 submodule 挂载将在开源阶段启用。
+在需要的那一侧目录内安装依赖并运行（下例为训练后端 A）：
+
+```bash
+conda activate origo_mjlab
+cd origo-rl-mjlab
+
+# 训练速度跟踪策略
+python scripts/train.py Origo-Flat
+
+# 回放（--agent zero 只看参考动作）
+python scripts/play.py Origo-Flat --agent zero
+```
+
+> 具体命令以各子仓库 README 为准；本仓库不提供 `make` / `uv run` 之类的统一入口。
 
 ---
 
@@ -87,7 +107,6 @@ make sim     # 起仿真
 |---|---|
 | [`docs/architecture.md`](docs/architecture.md) | 系统架构与数据流 |
 | [`docs/naming.md`](docs/naming.md) | 命名规范 |
-| [`docs/workflow.md`](docs/workflow.md) | 开发流程与分支策略 |
 
 ---
 
@@ -95,11 +114,11 @@ make sim     # 起仿真
 
 Origo 由社区共同建设。贡献前请先阅读：
 
-- [`docs/workflow.md`](docs/workflow.md) — 分支策略与 PR 流程
 - [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — 第三方组件与许可证
 
 **模块级问题反馈和代码贡献请前往对应的子仓库。** 本仓库的 Issue / PR 用于
-聚合层工作：根目录文档、仓库链接、元数据、流水线与同步流程。
+聚合层工作：根目录文档、仓库链接与元数据；跨仓库 CI、打包、分发与快照聚合在
+[`origo-pipeline`](https://github.com/origo-robotics/origo-pipeline)。
 
 ---
 

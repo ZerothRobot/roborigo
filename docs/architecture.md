@@ -35,7 +35,7 @@
         └─────────────────────┴─────────────────────┴──────────────────┘
                               ▼
                             origo
-                  （聚合入口：文档 / 流水线 / 统一命令 / 快照）
+                  （聚合入口：文档 / 仓库索引）
 ```
 
 ### 核心约束
@@ -43,7 +43,7 @@
 > **`origo-description` 是机器人描述的权威来源。**
 > 同一参数出现多个取值时，以它为准。
 
-这条约束带来实际的收益：关节顺序、执行器增益与限位始终有一个可对照的取值，
+这样做的收益是：关节顺序、执行器增益与限位始终有一个可对照的取值，
 训练与部署出现差异时可以直接复核定位。
 
 ---
@@ -79,7 +79,9 @@
 
 ## 4. 跨仓库协作机制
 
-### 现阶段：平级目录 + Python 包依赖
+### 现阶段：平级目录
+
+工作区不使用 submodule：各仓库是平级、独立的 git 仓库。
 
 ```
 <工作区根>/
@@ -87,44 +89,41 @@
 ├── origo-description/
 ├── origo-retarget/
 ├── origo-rl-mjlab/
-└── origo-rl-isaaclab/
+├── origo-rl-isaaclab/
+├── origo-deploy/
+├── origo-hardware/
+├── origo-appearance/
+├── origo-navigation/
+└── origo-pipeline/
 ```
 
-各仓库通过 **Python 包依赖**互相引用，代码在工作区中保持单一副本：
+| 消费方 | 目前持有描述的方式 |
+|---|---|
+| `origo-description` | 权威来源本身 |
+| `origo-retarget` | 本地副本 `asset/robot/origo/` |
+| `origo-rl-mjlab` | 本地副本 `src/origo_rl_mjlab/assets/robots/origo/` + `origo_constants.py` |
+| `origo-rl-isaaclab` | 本地副本 `source/origo/origo/assets/origo/` |
 
-```toml
-# origo-rl-mjlab/pyproject.toml
-[project]
-dependencies = ["origo-description"]
-
-[tool.uv.sources]
-origo-description = { path = "../origo-description", editable = true }
-```
-
-**现阶段选择包依赖的理由**：
-
-- submodule 会让每个子仓库各自携带一份完整历史，本地磁盘占用成倍增长
-- 当前的改进重点是把**机器人描述在多个仓库的重复**收敛为一处（每份含大量 USD/网格资产），
-  submodule 会加剧这一重复
-- 包依赖能做到零重复，且版本可钉（发布构建时改用 `origo-description==1.0.0`）
+各仓库如何引用机器人描述由自己决定——截至当前，没有任何仓库把
+`origo-description` 写进自己的依赖声明。
 
 **submodule 推迟到开源阶段**——它解决的是"社区用户一次 clone 拿到全部资源"
-的便利性问题，正确性已由包依赖保证。
+的便利性问题。
 
 ### 目录链接策略
 
-某些消费方（Isaac Lab 扩展、GMR 资产目录）要求资产位于**固定路径**。
+某些消费方（如 Isaac Lab 扩展）要求资产位于**固定路径**。
 处理原则：
 
 | 做法 | 结论 |
 |---|---|
-| 用 `make link` **本地生成** symlink，并加入 `.gitignore` | ✅ 推荐 |
+| **本地生成** symlink，并加入 `.gitignore` | ✅ 可用 |
 | 把 symlink **提交进 git** | ❌ 请改用本地生成——git 中的 symlink 只是路径字符串，clone 后即断链，CI 上会暴露该问题 |
 
-```makefile
-link:
-	@mkdir -p assets
-	@ln -sfn $$(python -c "import origo_description as d; print(d.asset_root())") assets/origo
+```bash
+# 在需要该路径的仓库内执行；源取 origo-description 的资产目录
+mkdir -p assets
+ln -sfn "$(python -c 'import origo_description as d; print(d.asset_root())')" assets/origo
 ```
 
 **symlink 采用本地生成是好工具；提交进 git 后会让 CI 在 clone 后断链。**
@@ -139,24 +138,23 @@ link:
 | 物理仿真 | MuJoCo / MuJoCo-Warp；Isaac Sim / Isaac Lab |
 | RL 算法 | PPO（RSL-RL） |
 | 动作重定向 | 逆运动学（mink + MuJoCo） |
-| 部署运行时 | ONNX Runtime |
-| 包管理 | uv |
-| 语言 | Python 3.10+；部署侧 C++17 |
+| 部署运行时 | ONNX Runtime（`origo-deploy` 的设计目标，代码尚未落盘） |
+| 包管理 | conda / pip（`uv pip` 亦可） |
+| 语言 | Python 3.10+；部署侧计划 C++17 |
 
 ---
 
 ## 6. 与外部框架的边界
 
-Origo **依赖**框架，框架代码统一通过依赖获取。
+Origo **优先依赖**框架，而不是把框架代码复制进仓库：一旦复制进来，
+就永久承担了它的升级合并成本，上游框架的每个版本更新都会变成手工合并。
 
 | 框架 | 关系 |
 |---|---|
-| mjlab | 依赖（PyPI / 源码安装），代码通过依赖获取 |
-| Isaac Lab | 依赖（外部安装），代码通过依赖获取 |
-| MuJoCo | 依赖 |
-| RSL-RL | 依赖 |
-
-**依赖获取框架的理由**：一旦把框架代码复制进仓库，就永久承担了它的升级合并成本。
-上游框架的每个版本更新都会变成手工合并。
+| mjlab | 依赖（PyPI，钉版 `mjlab==1.2.0`） |
+| Isaac Lab | 依赖（外部安装） |
+| MuJoCo / MuJoCo-Warp | 依赖 |
+| RSL-RL | 依赖。例外：`origo-rl-mjlab/src/rsl_rl_amp/` 是 rsl_rl 2.3.1 的**内嵌副本**（AMP 需要隔离改动），升级时需手工合并 |
+| BeyondMimic（whole_body_tracking） | 例外：`origo-rl-isaaclab` 的动作跟踪任务派生自它，代码已内嵌 |
 
 Origo 自己的代码只包含：任务定义、环境配置、机器人描述、部署栈。
