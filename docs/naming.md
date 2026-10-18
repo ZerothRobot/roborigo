@@ -11,9 +11,8 @@
 - **Python 包名**：全 snake_case → `origo_rl_mjlab`
 - **主域名**：`origo.bot`
 - 机器人资产文件名采用纯名称：`origo.urdf` / `origo.xml`，版本交给 git tag
-  （随上游一并携带的资产包可以保留其原有文件名，例如 `origo-rl-isaaclab` 的
-  `edu3_nqj13_trainable_fullbody.urdf`——包内的脚本与 USD 层按原名互相引用，
-  改名需要一并改这些引用）
+- 消费仓库中的 Origo 副本同样使用 `origo.urdf` / `origo.xml`；
+  USD 使用 `origo_body_trainable_fullbody*`，不再保留旧机器人前缀
 - 任务 ID 统一前缀 `Origo-`：`Origo-Flat` / `Origo-Tracking`
 - 分支统一 `main`
 
