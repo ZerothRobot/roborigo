@@ -37,15 +37,15 @@ Origo 由若干独立仓库组成。本仓库 (`origo`) 是**聚合入口**—�
 
 | 仓库 | 职责 | 依赖 |
 |---|---|---|
-| **[origo-description](https://github.com/origo-robotics/origo-description)** | **机器人描述的权威来源**<br>URDF / MJCF / USD / 网格 / 关节定义 / 执行器参数 | — |
-| **[origo-retarget](https://github.com/origo-robotics/origo-retarget)** | 人体动作 → 机器人动作的重定向流水线 | description |
-| **[origo-rl-mjlab](https://github.com/origo-robotics/origo-rl-mjlab)** | RL 训练后端 A（mjlab + MuJoCo-Warp） | description, retarget |
-| **[origo-rl-isaaclab](https://github.com/origo-robotics/origo-rl-isaaclab)** | RL 训练后端 B（Isaac Lab） | description, retarget |
-| **[origo-deploy](https://github.com/origo-robotics/origo-deploy)** | 策略部署与实机推理 | description |
-| **[origo-hardware](https://github.com/origo-robotics/origo-hardware)** | 机械结构 / 电气 / PCB / BOM | — |
-| **[origo-appearance](https://github.com/origo-robotics/origo-appearance)** | 外壳与 DIY 辅助工具 | hardware |
-| **[origo-navigation](https://github.com/origo-robotics/origo-navigation)** | 导航与定位等扩展 demo | description |
-| **[origo-pipeline](https://github.com/origo-robotics/origo-pipeline)** | 开发流水线 / 打包 / 分发 | 全部 |
+| **[origo-description](https://github.com/ZerothRobot/origo-description)** | **机器人描述的权威来源**<br>URDF / MJCF / USD / 网格 / 关节定义 / 执行器参数 | — |
+| **[origo-retarget](https://github.com/ZerothRobot/origo-retarget)** | 人体动作 → 机器人动作的重定向流水线 | description |
+| **[origo-rl-mjlab](https://github.com/ZerothRobot/origo-rl-mjlab)** | RL 训练后端 A（mjlab + MuJoCo-Warp） | description, retarget |
+| **[origo-rl-isaaclab](https://github.com/ZerothRobot/origo-rl-isaaclab)** | RL 训练后端 B（Isaac Lab） | description, retarget |
+| **[origo-deploy](https://github.com/ZerothRobot/origo-deploy)** | 策略部署与实机推理 | description |
+| **[origo-hardware](https://github.com/ZerothRobot/origo-hardware)** | 机械结构 / 电气 / PCB / BOM | — |
+| **[origo-appearance](https://github.com/ZerothRobot/origo-appearance)** | 外壳与 DIY 辅助工具 | hardware |
+| **[origo-navigation](https://github.com/ZerothRobot/origo-navigation)** | 导航与定位等扩展 demo | description |
+| **[origo-pipeline](https://github.com/ZerothRobot/origo-pipeline)** | 开发流水线 / 打包 / 分发 | 全部 |
 
 ### 依赖关系
 
@@ -118,7 +118,7 @@ Origo 由社区共同建设。贡献前请先阅读：
 
 **模块级问题反馈和代码贡献请前往对应的子仓库。** 本仓库的 Issue / PR 用于
 聚合层工作：根目录文档、仓库链接与元数据；跨仓库 CI、打包、分发与快照聚合在
-[`origo-pipeline`](https://github.com/origo-robotics/origo-pipeline)。
+[`origo-pipeline`](https://github.com/ZerothRobot/origo-pipeline)。
 
 ---
 
