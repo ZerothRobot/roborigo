@@ -61,4 +61,4 @@ checkpoints/
 
 # ---- 本地生成的目录链接（见 docs/architecture.md） ----
 # 由本地 `ln -sfn` 生成（见 docs/architecture.md），绝不提交
-**/assets/origo
+**/assets/roborigo
